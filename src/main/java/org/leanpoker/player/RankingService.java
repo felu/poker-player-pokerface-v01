@@ -31,8 +31,8 @@ public class RankingService {
 
     try {
       String stringResult = executePost("http://rainman.leanpoker.org/rank", param);
-      jsonResult = new JsonParser().parse(stringResult);
       System.out.println("Ranking: " + stringResult);
+      jsonResult = new JsonParser().parse(stringResult);
     } catch (Throwable t) {
       t.printStackTrace();
     }
