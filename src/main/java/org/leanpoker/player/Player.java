@@ -20,7 +20,7 @@ public class Player {
     int smallblind = request.getAsJsonObject().get("small_blind").getAsInt();
     System.out.println("Smallblind is: " + smallblind);
     tryRankingService();
-    return 2 * smallblind;
+    return 10 * smallblind;
   }
 
   private static void tryRankingService() {
