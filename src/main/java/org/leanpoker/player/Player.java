@@ -14,29 +14,40 @@ import java.util.Iterator;
 
 public class Player {
 
-  static final String VERSION = "Pokerface Java player";
+  static final String VERSION = "Pokerface Java player 10";
   private static final String FAKE_CARDS =
       "cards=[\n" + "    {\"rank\":\"5\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"6\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"spades\"},\n" + "    {\"rank\":\"8\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"9\",\"suit\":\"diamonds\"}\n" + "]";
 
   public static int betRequest(JsonElement request) {
     int smallblind = request.getAsJsonObject().get("small_blind").getAsInt();
-    int nextAmoutSmart = getNextAmoutSmart(request, smallblind);
-    return nextAmoutSmart != -1 ? nextAmoutSmart : 20 * smallblind;
+    if (isBadCard(request)) {
+      return 0;
+    }
+    int minimumBetAmount = getNextAmoutSmart(request, smallblind);
+    return minimumBetAmount != -1 ? minimumBetAmount : 20 * smallblind;
+  }
+
+  private static boolean isBadCard(JsonElement request) {
+    try {
+      PlayerData me = getPlayer(request);
+      return me.getCards().get(0).getIntValue() < 10 && me.getCards().get(1).getIntValue() < 10;
+    } catch (Throwable t) {
+      System.err.println("Exception in getNextAmoutSmart");
+      t.printStackTrace();
+      return true;
+    }
   }
 
   private static int getNextAmoutSmart(JsonElement request, int smallblind) {
     try {
       int minimum_raise = request.getAsJsonObject().get("minimum_raise").getAsInt();
       int current_buy_in = request.getAsJsonObject().get("current_buy_in").getAsInt();
-      int in_action = request.getAsJsonObject().get("in_action").getAsInt();
-      JsonArray players = request.getAsJsonObject().get("players").getAsJsonArray();
-      JsonObject me = getPlayer(in_action, players);
+      PlayerData me = getPlayer(request);
       System.out.println("Player: " + me.toString());
       System.out.println("minimum_raise: " + minimum_raise);
       System.out.println("current_buy_in: " + current_buy_in);
-      System.out.println("in_action: " + in_action);
 
-      int currentBet = me.get("bet").getAsInt(); //players[in_action][bet]
+      int currentBet = me.getCurrentBet(); //players[in_action][bet]
 
       System.out.println("currentBet: " + currentBet);
 
@@ -49,7 +60,10 @@ public class Player {
     }
   }
 
-  private static JsonObject getPlayer(int in_action, JsonArray players) {
+  private static PlayerData getPlayer(JsonElement request) {
+    JsonArray players = request.getAsJsonObject().get("players").getAsJsonArray();
+    int in_action = request.getAsJsonObject().get("in_action").getAsInt();
+    System.out.println("in_action: " + in_action);
     JsonObject me = null;
     Iterator<JsonElement> it = players.iterator();
     while (it.hasNext()) {
@@ -58,7 +72,7 @@ public class Player {
         me = player.getAsJsonObject();
       }
     }
-    return me;
+    return new PlayerData(me);
   }
 
   private static void tryRankingService() {
