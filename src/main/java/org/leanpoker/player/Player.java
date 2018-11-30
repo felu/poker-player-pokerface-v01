@@ -14,7 +14,7 @@ import java.util.Iterator;
 
 public class Player {
 
-  static final String VERSION = "Pokerface Java player 10";
+  static final String VERSION = "Pokerface Java player 11";
   private static final String FAKE_CARDS =
       "cards=[\n" + "    {\"rank\":\"5\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"6\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"spades\"},\n" + "    {\"rank\":\"8\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"9\",\"suit\":\"diamonds\"}\n" + "]";
 
@@ -30,7 +30,13 @@ public class Player {
   private static boolean isBadCard(JsonElement request) {
     try {
       PlayerData me = getPlayer(request);
-      return me.getCards().get(0).getIntValue() < 10 && me.getCards().get(1).getIntValue() < 10;
+      boolean result = me.getCards().get(0).getIntValue() < 10 && me.getCards().get(1).getIntValue() < 10;
+      if(result) {
+        System.out.println("Folding bad cards: "  + me.getCards());
+      } else {
+        System.out.println("Keeping cards: "  + me.getCards());
+      }
+      return result;
     } catch (Throwable t) {
       System.err.println("Exception in getNextAmoutSmart");
       t.printStackTrace();
