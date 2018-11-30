@@ -1,5 +1,8 @@
 package org.leanpoker.player;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -11,20 +14,25 @@ import java.util.List;
 
 public class RankingService {
   List<Card> cards = new ArrayList<>();
+  private JsonElement jsonResult;
+
   public RankingService init(List<Card> cards) {
     this.cards = cards;
     return this;
   }
 
   public RankingService callRankingService() {
-    if(cards.size() >= 5) {
+    if (cards.size() >= 5) {
       System.out.println("Skipping ranking service: too few cards.");
       return this;
     }
     String param = buildRequestParam();
     System.out.println("Ranking-Request: " + param);
+
     try {
-      System.out.println("Ranking: " + executePost("http://rainman.leanpoker.org/rank", param));
+      String stringResult = executePost("http://rainman.leanpoker.org/rank", param);
+      jsonResult = new JsonParser().parse(stringResult);
+      System.out.println("Ranking: " + stringResult);
     } catch (Throwable t) {
       t.printStackTrace();
     }
@@ -73,8 +81,8 @@ public class RankingService {
 
   public String buildRequestParam() {
     String ret = "cards=[";
-    boolean first =true;
-    for (Card card: cards) {
+    boolean first = true;
+    for (Card card : cards) {
       if (!first) {
         ret += ",";
       }
@@ -82,5 +90,17 @@ public class RankingService {
       first = false;
     }
     return ret + "]";
+  }
+
+  public int getRank() {
+    try {
+      if (jsonResult != null) {
+        return jsonResult.getAsJsonObject().get("rank").getAsInt();
+      }
+      return -1;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return -1;
+    }
   }
 }
