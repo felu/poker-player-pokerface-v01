@@ -14,13 +14,12 @@ import java.util.Iterator;
 
 public class Player {
 
-  static final String VERSION = "Pokerface Java player 14";
+  static final String VERSION = "Pokerface Java player 15";
   private static final String FAKE_CARDS =
       "cards=[\n" + "    {\"rank\":\"5\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"6\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"spades\"},\n" + "    {\"rank\":\"8\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"9\",\"suit\":\"diamonds\"}\n" + "]";
 
   public static int betRequest(JsonElement request) {
     int smallblind = request.getAsJsonObject().get("small_blind").getAsInt();
-    System.out.println("Smallblind is: " + smallblind);
     if (areBadCards(request)) {
       return 0;
     }
@@ -70,7 +69,6 @@ public class Player {
     try {
       int callAmount = getCallAmount(request);
       int minimum_raise = request.getAsJsonObject().get("minimum_raise").getAsInt();
-      System.out.println("minimum_raise: " + minimum_raise);
       return callAmount + minimum_raise;
     } catch (Throwable t) {
       System.err.println("Exception in getMinimumRaiseAmount");
@@ -83,12 +81,9 @@ public class Player {
     try {
       int current_buy_in = request.getAsJsonObject().get("current_buy_in").getAsInt();
       PlayerData me = getPlayer(request);
-      System.out.println("Player: " + me.toString());
-      System.out.println("current_buy_in: " + current_buy_in);
 
       int currentBet = me.getCurrentBet(); //players[in_action][bet]
 
-      System.out.println("currentBet: " + currentBet);
       return current_buy_in - currentBet;
     } catch (Throwable t) {
       System.err.println("Exception in getMinimumRaiseAmount");
@@ -100,7 +95,6 @@ public class Player {
   private static PlayerData getPlayer(JsonElement request) {
     JsonArray players = request.getAsJsonObject().get("players").getAsJsonArray();
     int in_action = request.getAsJsonObject().get("in_action").getAsInt();
-    System.out.println("in_action: " + in_action);
     JsonObject me = null;
     Iterator<JsonElement> it = players.iterator();
     while (it.hasNext()) {
