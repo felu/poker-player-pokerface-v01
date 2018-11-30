@@ -14,14 +14,14 @@ import java.util.Iterator;
 
 public class Player {
 
-  static final String VERSION = "Pokerface Java player 13";
+  static final String VERSION = "Pokerface Java player 14";
   private static final String FAKE_CARDS =
       "cards=[\n" + "    {\"rank\":\"5\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"6\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"spades\"},\n" + "    {\"rank\":\"8\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"9\",\"suit\":\"diamonds\"}\n" + "]";
 
   public static int betRequest(JsonElement request) {
     int smallblind = request.getAsJsonObject().get("small_blind").getAsInt();
     System.out.println("Smallblind is: " + smallblind);
-    if (isBadCard(request)) {
+    if (areBadCards(request)) {
       return 0;
     }
     new RankingService().init(getPlayer(request).getCards()).callRankingService();
@@ -52,16 +52,13 @@ public class Player {
     }
   }
 
-  private static boolean isBadCard(JsonElement request) {
+  private static boolean areBadCards(JsonElement request) {
     try {
       PlayerData me = getPlayer(request);
-      boolean result = me.getCards().get(0).getIntValue() < 10 && me.getCards().get(1).getIntValue() < 10;
-      if (result) {
-        System.out.println("Folding bad cards: " + me.getCards());
-      } else {
-        System.out.println("Keeping cards: " + me.getCards());
+      if(me.getCards().get(0).getIntValue() == me.getCards().get(1).getIntValue()) {
+        return false;
       }
-      return result;
+      return me.getCards().get(0).getIntValue() < 10 && me.getCards().get(1).getIntValue() < 10;
     } catch (Throwable t) {
       System.err.println("Exception in getMinimumRaiseAmount");
       t.printStackTrace();
