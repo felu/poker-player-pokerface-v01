@@ -18,6 +18,7 @@ public class RankingService {
 
   public RankingService callRankingService() {
     String param = buildRequestParam();
+    System.out.println("Ranking-Request: " + param);
     try {
       System.out.println("Ranking: " + executePost("http://rainman.leanpoker.org/rank", param));
     } catch (Throwable t) {
