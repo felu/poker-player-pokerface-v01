@@ -10,11 +10,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class Player {
 
-  static final String VERSION = "Pokerface Java player 15";
+  static final String VERSION = "Pokerface Java player 16";
   private static final String FAKE_CARDS =
       "cards=[\n" + "    {\"rank\":\"5\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"6\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"spades\"},\n" + "    {\"rank\":\"8\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"9\",\"suit\":\"diamonds\"}\n" + "]";
 
@@ -23,15 +25,32 @@ public class Player {
     if (areBadCards(request)) {
       return 0;
     }
-    new RankingService().init(getPlayer(request).getCards()).callRankingService();
+    new RankingService().init(getAllCards(request)).callRankingService();
     int minimumBetAmount = getMinimumRaiseAmount(request);
-    if(minimumBetAmount == -1) {
+    if (minimumBetAmount == -1) {
       return 20 * smallblind;
     }
     if (areGoodCards(request)) {
       return 5 * minimumBetAmount;
     }
     return getCallAmount(request);
+  }
+
+  private static List<Card> getAllCards(JsonElement request) {
+    List<Card> handCards = getPlayer(request).getCards();
+    handCards.addAll(getBoardCards(request));
+    return handCards;
+  }
+
+  private static List<Card> getBoardCards(JsonElement request) {
+    JsonArray community_cards = request.getAsJsonObject().get("community_cards").getAsJsonArray();
+    List<Card> result = new ArrayList<>();
+    Iterator<JsonElement> it = community_cards.iterator();
+    while (it.hasNext()) {
+      JsonElement cardJson = it.next();
+      result.add(new Card(cardJson.getAsJsonObject()));
+    }
+    return result;
   }
 
   private static boolean areGoodCards(JsonElement request) {
@@ -54,7 +73,7 @@ public class Player {
   private static boolean areBadCards(JsonElement request) {
     try {
       PlayerData me = getPlayer(request);
-      if(me.getCards().get(0).getIntValue() == me.getCards().get(1).getIntValue()) {
+      if (me.getCards().get(0).getIntValue() == me.getCards().get(1).getIntValue()) {
         return false;
       }
       return me.getCards().get(0).getIntValue() < 10 && me.getCards().get(1).getIntValue() < 10;
