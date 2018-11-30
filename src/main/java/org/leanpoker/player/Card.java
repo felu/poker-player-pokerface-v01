@@ -38,6 +38,6 @@ public class Card {
   }
 
   public String getSuite() {
-    return json.get("suite").getAsString();
+    return json.get("suit").getAsString();
   }
 }
