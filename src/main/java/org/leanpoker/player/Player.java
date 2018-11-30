@@ -16,7 +16,7 @@ import java.util.List;
 
 public class Player {
 
-  static final String VERSION = "Pokerface Java player 20";
+  static final String VERSION = "Pokerface Java player 21";
   private static final String FAKE_CARDS =
       "cards=[\n" + "    {\"rank\":\"5\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"6\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"spades\"},\n" + "    {\"rank\":\"8\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"9\",\"suit\":\"diamonds\"}\n" + "]";
 
@@ -34,6 +34,7 @@ public class Player {
       return getCallAmount(request) + 2 * smallblind * rank;
     }
     if (minimumBetAmount == -1) {
+      System.err.println("Failed to extract minimal bet amount");
       return 20 * smallblind;
     }
     if (areGoodCards(request)) {
