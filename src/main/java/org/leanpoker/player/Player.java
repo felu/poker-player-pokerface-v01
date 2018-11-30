@@ -14,31 +14,35 @@ import java.util.Iterator;
 
 public class Player {
 
-  static final String VERSION = "Pokerface Java player 12";
+  static final String VERSION = "Pokerface Java player 13";
   private static final String FAKE_CARDS =
       "cards=[\n" + "    {\"rank\":\"5\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"6\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"spades\"},\n" + "    {\"rank\":\"8\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"9\",\"suit\":\"diamonds\"}\n" + "]";
 
   public static int betRequest(JsonElement request) {
     int smallblind = request.getAsJsonObject().get("small_blind").getAsInt();
+    System.out.println("Smallblind is: " + smallblind);
     if (isBadCard(request)) {
       return 0;
     }
     new RankingService().init(getPlayer(request).getCards()).callRankingService();
-    int minimumBetAmount = getMinimumRaiseAmount(request, smallblind);
+    int minimumBetAmount = getMinimumRaiseAmount(request);
+    if(minimumBetAmount == -1) {
+      return 20 * smallblind;
+    }
     if (areGoodCards(request)) {
       return 5 * minimumBetAmount;
     }
-    return minimumBetAmount != -1 ? minimumBetAmount : 20 * smallblind;
+    return getCallAmount(request);
   }
 
   private static boolean areGoodCards(JsonElement request) {
     try {
       PlayerData me = getPlayer(request);
       boolean result = me.getCards().get(0).getIntValue() > 10 && me.getCards().get(1).getIntValue() > 10;
-      if(result) {
-        System.out.println("Having good cards bad cards: "  + me.getCards());
+      if (result) {
+        System.out.println("Having good cards bad cards: " + me.getCards());
       } else {
-        System.out.println("Avarage cards: "  + me.getCards());
+        System.out.println("Avarage cards: " + me.getCards());
       }
       return result;
     } catch (Throwable t) {
@@ -52,10 +56,10 @@ public class Player {
     try {
       PlayerData me = getPlayer(request);
       boolean result = me.getCards().get(0).getIntValue() < 10 && me.getCards().get(1).getIntValue() < 10;
-      if(result) {
-        System.out.println("Folding bad cards: "  + me.getCards());
+      if (result) {
+        System.out.println("Folding bad cards: " + me.getCards());
       } else {
-        System.out.println("Keeping cards: "  + me.getCards());
+        System.out.println("Keeping cards: " + me.getCards());
       }
       return result;
     } catch (Throwable t) {
@@ -65,21 +69,30 @@ public class Player {
     }
   }
 
-  private static int getMinimumRaiseAmount(JsonElement request, int smallblind) {
+  private static int getMinimumRaiseAmount(JsonElement request) {
     try {
+      int callAmount = getCallAmount(request);
       int minimum_raise = request.getAsJsonObject().get("minimum_raise").getAsInt();
+      System.out.println("minimum_raise: " + minimum_raise);
+      return callAmount + minimum_raise;
+    } catch (Throwable t) {
+      System.err.println("Exception in getMinimumRaiseAmount");
+      t.printStackTrace();
+      return -1;
+    }
+  }
+
+  private static int getCallAmount(JsonElement request) {
+    try {
       int current_buy_in = request.getAsJsonObject().get("current_buy_in").getAsInt();
       PlayerData me = getPlayer(request);
       System.out.println("Player: " + me.toString());
-      System.out.println("minimum_raise: " + minimum_raise);
       System.out.println("current_buy_in: " + current_buy_in);
 
       int currentBet = me.getCurrentBet(); //players[in_action][bet]
 
       System.out.println("currentBet: " + currentBet);
-
-      System.out.println("Smallblind is: " + smallblind);
-      return current_buy_in - currentBet + minimum_raise;
+      return current_buy_in - currentBet;
     } catch (Throwable t) {
       System.err.println("Exception in getMinimumRaiseAmount");
       t.printStackTrace();
