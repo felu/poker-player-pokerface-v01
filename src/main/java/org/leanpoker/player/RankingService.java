@@ -71,10 +71,10 @@ public class RankingService {
     String ret = "cards=[";
     boolean first =true;
     for (Card card: cards) {
-      ret += card.toRanking();
       if (!first) {
         ret += ",";
       }
+      ret += card.toRanking();
       first = false;
     }
     return ret + "]";
