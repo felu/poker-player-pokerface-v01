@@ -22,7 +22,7 @@ public class RankingService {
   }
 
   public RankingService callRankingService() {
-    if (cards.size() >= 5) {
+    if (cards.size() < 5) {
       System.out.println("Skipping ranking service: too few cards.");
       return this;
     }
