@@ -14,7 +14,7 @@ import java.util.Iterator;
 
 public class Player {
 
-  static final String VERSION = "Pokerface Java player 11";
+  static final String VERSION = "Pokerface Java player 12";
   private static final String FAKE_CARDS =
       "cards=[\n" + "    {\"rank\":\"5\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"6\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"spades\"},\n" + "    {\"rank\":\"8\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"9\",\"suit\":\"diamonds\"}\n" + "]";
 
@@ -23,8 +23,28 @@ public class Player {
     if (isBadCard(request)) {
       return 0;
     }
-    int minimumBetAmount = getNextAmoutSmart(request, smallblind);
+    int minimumBetAmount = getMinimumRaiseAmount(request, smallblind);
+    if (areGoodCards(request)) {
+      return 5 * minimumBetAmount;
+    }
     return minimumBetAmount != -1 ? minimumBetAmount : 20 * smallblind;
+  }
+
+  private static boolean areGoodCards(JsonElement request) {
+    try {
+      PlayerData me = getPlayer(request);
+      boolean result = me.getCards().get(0).getIntValue() > 10 && me.getCards().get(1).getIntValue() > 10;
+      if(result) {
+        System.out.println("Having good cards bad cards: "  + me.getCards());
+      } else {
+        System.out.println("Avarage cards: "  + me.getCards());
+      }
+      return result;
+    } catch (Throwable t) {
+      System.err.println("Exception in getMinimumRaiseAmount");
+      t.printStackTrace();
+      return true;
+    }
   }
 
   private static boolean isBadCard(JsonElement request) {
@@ -38,13 +58,13 @@ public class Player {
       }
       return result;
     } catch (Throwable t) {
-      System.err.println("Exception in getNextAmoutSmart");
+      System.err.println("Exception in getMinimumRaiseAmount");
       t.printStackTrace();
       return true;
     }
   }
 
-  private static int getNextAmoutSmart(JsonElement request, int smallblind) {
+  private static int getMinimumRaiseAmount(JsonElement request, int smallblind) {
     try {
       int minimum_raise = request.getAsJsonObject().get("minimum_raise").getAsInt();
       int current_buy_in = request.getAsJsonObject().get("current_buy_in").getAsInt();
@@ -60,7 +80,7 @@ public class Player {
       System.out.println("Smallblind is: " + smallblind);
       return current_buy_in - currentBet + minimum_raise;
     } catch (Throwable t) {
-      System.err.println("Exception in getNextAmoutSmart");
+      System.err.println("Exception in getMinimumRaiseAmount");
       t.printStackTrace();
       return -1;
     }
