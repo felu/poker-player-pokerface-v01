@@ -17,6 +17,10 @@ public class RankingService {
   }
 
   public RankingService callRankingService() {
+    if(cards.size() >= 5) {
+      System.out.println("Skipping ranking service: too few cards.");
+      return this;
+    }
     String param = buildRequestParam();
     System.out.println("Ranking-Request: " + param);
     try {

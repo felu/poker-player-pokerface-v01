@@ -16,7 +16,7 @@ import java.util.List;
 
 public class Player {
 
-  static final String VERSION = "Pokerface Java player 16";
+  static final String VERSION = "Pokerface Java player 17";
   private static final String FAKE_CARDS =
       "cards=[\n" + "    {\"rank\":\"5\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"6\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"7\",\"suit\":\"spades\"},\n" + "    {\"rank\":\"8\",\"suit\":\"diamonds\"},\n" + "    {\"rank\":\"9\",\"suit\":\"diamonds\"}\n" + "]";
 
