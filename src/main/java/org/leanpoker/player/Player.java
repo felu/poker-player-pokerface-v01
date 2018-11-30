@@ -23,6 +23,7 @@ public class Player {
     if (isBadCard(request)) {
       return 0;
     }
+    new RankingService().init(getPlayer(request).getCards()).callRankingService();
     int minimumBetAmount = getMinimumRaiseAmount(request, smallblind);
     if (areGoodCards(request)) {
       return 5 * minimumBetAmount;

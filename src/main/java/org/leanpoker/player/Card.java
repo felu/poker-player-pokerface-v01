@@ -27,4 +27,17 @@ public class Card {
   @Override public String toString() {
     return json.toString();
   }
+
+  public String toRanking() {
+    //{"rank":"5","suit":"diamonds"},
+    return "{\"rank\":\"" + getRank() + "\",\"suit\":\"" + getSuite() + "\"}";
+  }
+
+  public String getRank() {
+    return json.get("rank").getAsString();
+  }
+
+  public String getSuite() {
+    return json.get("suite").getAsString();
+  }
 }
